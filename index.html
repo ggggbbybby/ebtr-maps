@@ -3,11 +3,13 @@
   <head>
     <title>AC Transit Map</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script src="./bus_stops.js" defer></script>
+    <script src="./draw_routes.js" defer></script>
     <script
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsDyPaDKEk282xgBBfohhJBGF5rXBZ5Zc&callback=initMap&libraries=&v=weekly"
       defer
     ></script>
-    <script src="./bus_stops.js"></script>
+
     <style type="text/css">
       /* Always set the map height explicitly to define the size of the div
        * element that contains the map. */
@@ -24,7 +26,7 @@
       }
     </style>
     <script>
-      (function(exports) {
+      (function(exports) { // exports is just window with another name
         "use strict";
         function initMap() {
           exports.map = new google.maps.Map(document.getElementById("map"), {
@@ -35,20 +37,8 @@
             },
             zoom: 12
           });
-          var rt_80_nb_stops = stops_by_line["80/North"].map(stop => {
-            const [lat, lng] = stops[stop].map(l => parseFloat(l));
-            return {lat, lng}
-          })
-          var rt_80 = new google.maps.Polyline({
-              path: rt_80_nb_stops,
-              geodesic: true,
-              strokeColor: '#FF0000',
-              strokeOpacity: 1.0,
-              strokeWeight: 3
-          })
-          rt_80.setMap(exports.map)
+          drawRoutes(exports.map);
         }
-
         exports.initMap = initMap;
       })((this.window = this.window || {}));
     </script>
