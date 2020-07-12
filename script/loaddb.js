@@ -1,5 +1,7 @@
 const knex = require('../lib/db');
 const actransitApi = require('../lib/actransit_api');
+const equal = require('fast-deep-equal');
+const patterns = {};
 
 knex.transaction(async (trx) => {
   await trx('route_stop').del();
@@ -8,7 +10,7 @@ knex.transaction(async (trx) => {
 
   const routes = await actransitApi('routes');
   for (const route of routes) {
-    //console.log(route.RouteId);
+    console.log(route.RouteId);
     await trx('route').insert({
       id: route.RouteId,
       description: route.Description,
@@ -17,6 +19,13 @@ knex.transaction(async (trx) => {
 
     const waypoints = await actransitApi(`route/${route.RouteId}/waypoints`);
     for (const pattern of waypoints[0].Patterns) {
+      const key = `${route.RouteId}_${pattern.Direction}`;
+      patterns[key] = patterns[key] || [];
+      if (patterns[key].some(p => equal(p.Waypoints, pattern.Waypoints))) {
+        continue;
+      }
+      patterns[key].push(pattern);
+
       const route_direction_id = (await trx('route_direction').insert({
         route_id: route.RouteId,
         direction: pattern.Direction,
