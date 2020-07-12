@@ -8,6 +8,17 @@ fastify.register(require('fastify-static'), {
   root: `${__dirname}/public`
 });
 
+fastify.get('/routes', async (request, reply) => {
+  const routes = await knex('route_direction')
+    .select('route_id', knex.raw('group_concat(direction) as directions'))
+    .groupBy('route_id')
+    .orderBy('route_id');
+  for (const route of routes) {
+    route.directions = route.directions.split(/,/);
+  }
+  reply.send(routes);
+});
+
 fastify.get('/stops/:line/:dir', async (request, reply) => {
   const ids = await knex('route_direction')
     .select('id')
