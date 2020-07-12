@@ -3,6 +3,21 @@ const actransitApi = require('../lib/actransit_api');
 const equal = require('fast-deep-equal');
 const patterns = {};
 
+const routeType = {
+  "F": "transbay",
+  "NL": "transbay",
+  "O": "transbay",
+  "701": "early",
+  "702": "early",
+  "706": "early",
+  "800": "night",
+  "801": "night",
+  "802": "night",
+  "805": "night",
+  "840": "night",
+  "851": "night"
+};
+
 knex.transaction(async (trx) => {
   await trx('route_stop').del();
   await trx('route_direction').del();
@@ -14,7 +29,7 @@ knex.transaction(async (trx) => {
     await trx('route').insert({
       id: route.RouteId,
       description: route.Description,
-      type: 'local'
+      type: routeType[route.RouteId] || 'local'
     });
 
     const waypoints = await actransitApi(`route/${route.RouteId}/waypoints`);
