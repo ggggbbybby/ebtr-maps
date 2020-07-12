@@ -14,7 +14,7 @@ fastify.get('/routes', async (request, reply) => {
     .groupBy('route_id')
     .orderBy('route_id');
   for (const route of routes) {
-    route.directions = route.directions.split(/,/);
+    route.directions = route.directions.split(/,/).sort();
   }
   reply.send(routes);
 });
